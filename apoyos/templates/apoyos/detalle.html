@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detalle del Apoyo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        :root {
+            --color1: #611232; 
+            --color2: #ffffff; 
+            --color3: #000000; 
+            --color4: #dddddd;
+        }
+
+        .header {
+            background-color: var(--color1);
+            padding: 20px;
+            text-align: center;
+            color: var(--color2);
+        }
+
+        .detalle-noticia {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer {
+            background-color: var(--color1);
+            color: var(--color2);
+            text-align: center;
+            padding: 15px;
+            margin-top: 30px;
+        }
+
+        .social-icons a {
+            color: var(--color2);
+            font-size: 20px;
+            margin: 0 10px;
+            transition: transform 0.3s;
+        }
+
+        .social-icons a:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <h3 class="fw-bold">{{ apoyo.nombre }}</h3>
+</header>
+
+<!-- Contenido principal -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="detalle-noticia p-4">
+                <p><strong>Descripción Detallada:</strong> {{ apoyo.descripcion }}</p>
+
+                <h4 class="mt-3">Requisitos para solicitar el apoyo:</h4>
+                <ul>
+                    {% for requisito in apoyo.requisitos.all %}
+                        <li>{{ requisito.descripcion }}</li>
+                    {% empty %}
+                        <li>No hay requisitos para este apoyo.</li>
+                    {% endfor %}
+                </ul>
+                </ul>
+
+                <div class="mt-3">
+                    <strong>Estado:</strong>
+                    <span class="badge {% if apoyo.disponible %}bg-success{% else %}bg-danger{% endif %}">
+                        {% if apoyo.disponible %}✅ Disponible{% else %}❌ No disponible{% endif %}
+                    </span>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <a href="{% url 'inicio' %}" class="btn btn-outline-secondary">
+                        ⬅️ Volver
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'solicitar_apoyo' apoyo.id %}" class="btn btn-primary">
+                        📩 Solicitar Apoyo
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>© 2024 Plataforma de Noticias Gubernamentales | Todos los derechos reservados.</p>
+    <div class="social-icons">
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
