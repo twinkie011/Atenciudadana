@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Tipo de Apoyo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap + FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="{% static 'img/favicon.png' %}" type="image/png">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .titulo-barra {
+            background-color: #611232;
+            color: white;
+            padding: 1.3rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .form-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 0 12px rgba(0,0,0,0.06);
+        }
+        .btn-primario {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .btn-primario:hover {
+            background-color: #0b5ed7;
+        }
+        .btn-gris {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-gris:hover {
+            background-color: #5a6268;
+        }
+        @media (max-width: 768px) {
+            .titulo-barra {
+                font-size: 1.1rem;
+            }
+            .form-card {
+                padding: 1.2rem;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            .d-flex.justify-content-between {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Título -->
+<div class="titulo-barra">
+    <i class="fas fa-edit me-2"></i>Editar Tipo de Apoyo
+</div>
+
+<div class="container">
+    <div class="form-card">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="mb-3">
+                <label for="id_nombre" class="form-label">Nombre del Tipo</label>
+                {{ form.nombre }}
+                {% for error in form.nombre.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'listar_tipos_apoyo' %}" class="btn btn-gris">
+                    <i class="fas fa-arrow-left me-1"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-primario" disabled>
+                    <i class="fas fa-save me-1"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Script con validación -->
+{{ tipos_existentes|json_script:"nombresJSON" }}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('id_nombre');
+    const btnGuardar = document.querySelector('button[type="submit"]');
+    const nombres = JSON.parse(document.getElementById('nombresJSON').textContent);
+    const valorOriginal = input.value.trim().toLowerCase();
+
+    const errorMsg = document.createElement('div');
+    errorMsg.className = 'text-danger small mt-1';
+    errorMsg.style.display = 'none';
+    input.parentNode.appendChild(errorMsg);
+
+    function normalizar(texto) {
+        return texto.trim().toLowerCase();
+    }
+
+    function validar() {
+        const valorActual = normalizar(input.value);
+        const repetido = nombres.includes(valorActual) && valorActual !== valorOriginal;
+
+        if (!valorActual) {
+            errorMsg.innerText = '⚠️ El nombre no puede estar vacío.';
+            errorMsg.style.display = 'block';
+            btnGuardar.disabled = true;
+        } else if (repetido) {
+            errorMsg.innerText = '⚠️ Este nombre ya está registrado.';
+            errorMsg.style.display = 'block';
+            btnGuardar.disabled = true;
+        } else if (valorActual === valorOriginal) {
+            errorMsg.style.display = 'block';
+            btnGuardar.disabled = true;
+        } else {
+            errorMsg.style.display = 'none';
+            btnGuardar.disabled = false;
+        }
+    }
+
+    input.addEventListener('input', validar);
+    validar();
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administradores Registrados</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap y FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+
+    <style>
+        body {
+            background-color: #f2f2f2;
+        }
+
+        .header-bar {
+            background-color: #611232;
+            color: white;
+            padding: 1.2rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .table-container {
+            background: white;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-sm {
+            font-size: 0.875rem;
+            padding: 0.4rem 0.75rem;
+        }
+
+        .btn-action {
+            border-radius: 20px;
+        }
+
+        .btn-volver {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-volver:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-nuevo {
+            background-color: #1f7a47;
+            color: white;
+        }
+
+        .btn-nuevo:hover {
+            background-color: #18633a;
+        }
+
+        .pagination {
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .header-bar {
+                font-size: 1.1rem;
+            }
+            .table-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-bar">
+    <i class="fas fa-users-cog me-2"></i>Administradores Registrados
+</div>
+
+<div class="container table-container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
+        <a href="{% url 'panel_alcalde' %}" class="btn btn-volver btn-action">
+            <i class="fas fa-arrow-left me-1"></i> Volver al Panel Principal
+        </a>
+        <a href="{% url 'crear_administrador' %}" class="btn btn-nuevo btn-action">
+            <i class="fas fa-user-plus me-1"></i> Nuevo Administrador
+        </a>
+    </div>
+
+    <div class="mb-3">
+        <input type="text" id="buscador" class="form-control" placeholder="Buscar por nombre..." onkeyup="filtrarTabla()">
+    </div>
+
+    <div class="table-responsive">
+        <table id="tabla-admins" class="table table-bordered table-hover align-middle">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>#</th>
+                    <th>Nombre completo</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Municipio</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for admin in administradores %}
+                    <tr>
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td class="nombre">{{ admin.nombre }} {{ admin.apellidos }}</td>
+                        <td>{{ admin.email }}</td>
+                        <td>{{ admin.telefono }}</td>
+                        <td>{{ admin.municipio }}</td>
+                        <td class="text-center">
+                            <a href="{% url 'editar_administrador' admin.id %}" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'eliminar_administrador' admin.id %}" class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('¿Estás seguro de eliminar este administrador?');">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted">No hay administradores registrados.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <nav>
+        <ul class="pagination mt-4" id="paginacion"></ul>
+    </nav>
+</div>
+
+<script>
+    const filasPorPagina = 8;
+    let paginaActual = 1;
+
+    function filtrarTabla() {
+        const filtro = document.getElementById("buscador").value.toLowerCase();
+        const filas = document.querySelectorAll("#tabla-admins tbody tr");
+        let visibles = [];
+
+        filas.forEach(fila => {
+            const nombre = fila.querySelector(".nombre").textContent.toLowerCase();
+            if (nombre.includes(filtro)) {
+                fila.style.display = "";
+                visibles.push(fila);
+            } else {
+                fila.style.display = "none";
+            }
+        });
+
+        paginar(visibles);
+    }
+
+    function paginar(filas) {
+        const totalPaginas = Math.ceil(filas.length / filasPorPagina);
+        const paginacion = document.getElementById("paginacion");
+        paginacion.innerHTML = "";
+
+        if (paginaActual > totalPaginas) paginaActual = 1;
+
+        filas.forEach((fila, index) => {
+            fila.style.display = (index >= (paginaActual - 1) * filasPorPagina && index < paginaActual * filasPorPagina) ? "" : "none";
+        });
+
+        for (let i = 1; i <= totalPaginas; i++) {
+            const li = document.createElement("li");
+            li.className = `page-item ${i === paginaActual ? "active" : ""}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.addEventListener("click", e => {
+                e.preventDefault();
+                paginaActual = i;
+                filtrarTabla();
+            });
+            paginacion.appendChild(li);
+        }
+    }
+
+    // Inicialización al cargar la página
+    window.onload = () => {
+        filtrarTabla(); // hace paginación de todo
+    };
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

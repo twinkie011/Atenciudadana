@@ -1,0 +1,153 @@
+{% load static %}
+{% block content %}
+<title>Detalle de la solicitud</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link rel="icon" href="{% static 'img/favicon.png' %}" type="image/png">
+<style>
+  .card-header {
+    background: linear-gradient(to right, #611232, #8e1c3a);
+  }
+
+  .card {
+    border-radius: 12px;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+  .badge-estado {
+    font-size: 0.9rem;
+    padding: 0.5em 0.75em;
+  }
+
+  .archivo-link {
+    text-decoration: none;
+    font-weight: bold;
+    color: #611232;
+  }
+
+  .archivo-link:hover {
+    text-decoration: underline;
+  }
+
+  .subir-form input[type="file"] {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0.4rem;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+  }
+
+  .subir-form input[type="file"]:hover {
+    border-color: #611232;
+  }
+
+  .btn-outline-primary {
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #611232;
+    color: white;
+    border-color: #611232;
+  }
+</style>
+
+<div class="container py-5">
+  <div class="card shadow">
+    <div class="card-header text-white fw-bold">
+      Detalle de la Solicitud: {{ solicitud.apoyo.nombre }}
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <p><strong>Estado:</strong>
+            {% if solicitud.estado == 'aprobada' %}
+              <span class="badge bg-success badge-estado">Aprobada</span>
+            {% elif solicitud.estado == 'rechazada' %}
+              <span class="badge bg-danger badge-estado">Rechazada</span>
+            {% else %}
+              <span class="badge bg-warning text-dark badge-estado">Pendiente</span>
+            {% endif %}
+          </p>
+          <p><strong>Motivo:</strong> {{solicitud.motivo_rechazo }}</p>
+          <p><strong>Ocupación:</strong> {{ solicitud.ocupacion }}</p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Educación:</strong> {{ solicitud.educacion }}</p>
+          <p><strong>Vivienda:</strong> {{ solicitud.vivienda }}</p>
+          <p><strong>Fecha:</strong> {{ solicitud.fecha_creacion|date:"d/m/Y H:i" }}</p>
+        </div>
+      </div>
+
+      {% if solicitud.documentos.all %}
+        <hr>
+        <h5 class="fw-bold mb-3">📄 Documentos entregados</h5>
+        <ul class="list-group">
+          {% for doc in solicitud.documentos.all %}
+          <li class="list-group-item border-0 shadow-sm rounded mb-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+
+              <!-- Visual del documento -->
+              <div class="w-100">
+                <!-- Icono + Nombre Requisito -->
+                <span class="d-flex align-items-center fw-bold text-dark mb-2">
+                  <i class="fas fa-file-pdf me-2 text-danger"></i>
+                  {{ doc.requisito.descripcion }}
+                </span>
+
+                <!-- Botón visual del archivo -->
+                <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-outline-secondary btn-sm mb-2">
+                  <i class="fas fa-file-download me-1"></i> Ver archivo ({{ doc.archivo.name|slice:"15:" }})
+                </a>
+
+                <!-- Estado -->
+                <div class="mb-1">
+                  <small class="fw-semibold text-muted">Estado:</small>
+                  {% if doc.estado == 'aprobado' %}
+                    <span class="badge bg-success ms-1">Aprobado</span>
+                  {% elif doc.estado == 'rechazado' %}
+                    <span class="badge bg-danger ms-1">Rechazado</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark ms-1">Pendiente</span>
+                  {% endif %}
+                </div>
+
+                <!-- Observaciones -->
+                {% if doc.observaciones %}
+                  <div>
+                    <small class="fw-semibold text-muted">Observaciones:</small>
+                    <span class="text-dark">{{ doc.observaciones }}</span>
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- Subir nuevo documento si fue rechazado -->
+              {% if doc.estado == 'rechazado' %}
+              <form method="POST" enctype="multipart/form-data" action="{% url 'reemplazar_documento' doc.id %}" class="subir-form d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
+                {% csrf_token %}
+                <input type="file" name="archivo" accept="application/pdf" required class="form-control form-control-sm">
+                <button class="btn btn-outline-primary btn-sm" type="submit">
+                  <i class="fas fa-upload me-1"></i> Subir nuevo
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <div class="mt-4">
+        <a href="{% url 'panel_usuario' %}" class="btn btn-secondary">
+          <i class="fas fa-arrow-left"></i> Volver al perfil
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

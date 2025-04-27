@@ -39,6 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apoyos',
     'autenticacion',
+    'alcalde',
+    'sugerencias',
+    'noticias',
+    'administrador',
+
+
 ]
 AUTH_USER_MODEL = 'autenticacion.CustomUser'
 
@@ -127,3 +133,16 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Redirecciones después de login y logout
+LOGIN_REDIRECT_URL = '/'  # Te manda al inicio
+LOGOUT_REDIRECT_URL = '/login/'  # Te manda al login
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'apoyos' / 'static',
+    BASE_DIR / 'autenticacion' / 'static',
+]
+
+# Archivos de usuario (documentos PDF, imágenes, etc.)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

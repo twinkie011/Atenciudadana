@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Solicitudes de Apoyo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    
+    .titulo-barra {
+      background-color: #611232;
+      color: white;
+      padding: 1.3rem;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .contenedor {
+      background: white;
+      padding: 2rem;
+      margin-top: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.05);
+    }
+
+    .badge-pendiente {
+      background-color: #ffc107;
+      color: #212529;
+    }
+
+    .badge-aprobada {
+      background-color: #198754;
+    }
+
+    .badge-rechazada {
+      background-color: #dc3545;
+    }
+
+    .btn-filtro.active {
+      background-color: #611232;
+      color: white;
+    }
+
+    .tarjeta-solicitud {
+      display: none;
+    }
+
+   
+
+    @media (max-width: 768px) {
+      .tabla-solicitudes {
+        display: none;
+      }
+
+      .tarjeta-solicitud {
+        display: block;
+      }
+
+      .tarjeta-solicitud .card {
+        margin-bottom: 1rem;
+        border-left: 6px solid #611232;
+      }
+
+      .card-title {
+        color: #611232;
+        font-weight: 600;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="titulo-barra">
+  <i class="fas fa-file-alt me-2"></i> Solicitudes de Apoyo
+</div>
+
+<div class="container contenedor">
+
+  <!-- Botón volver -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-column flex-md-row gap-3">
+    <a href="{% url 'panel_alcalde' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-1"></i> Volver al Panel
+    </a>
+  </div>
+
+  <!-- Filtros -->
+  <form method="get" class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o apoyo..." value="{{ search|default_if_none:'' }}">
+    <div class="btn-group">
+      <a href="{% url 'solicitudes_alcalde' %}" class="btn btn-outline-dark btn-filtro {% if not estado %}active{% endif %}">Todos</a>
+      <a href="?estado=pendiente{% if search %}&q={{ search }}{% endif %}" class="btn btn-outline-dark btn-filtro {% if estado == 'pendiente' %}active{% endif %}">Pendientes</a>
+      <a href="?estado=aprobada{% if search %}&q={{ search }}{% endif %}" class="btn btn-outline-dark btn-filtro {% if estado == 'aprobada' %}active{% endif %}">Aprobadas</a>
+      <a href="?estado=rechazada{% if search %}&q={{ search }}{% endif %}" class="btn btn-outline-dark btn-filtro {% if estado == 'rechazada' %}active{% endif %}">Rechazadas</a>
+    </div>
+  </form>
+
+
+  <!-- TABLA (PC) -->
+  <div class="table-responsive tabla-solicitudes">
+    <table class="table table-bordered align-middle text-center table-hover w-100">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Usuario</th>
+          <th>CURP</th>
+          <th>Apoyo</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for solicitud in page_obj %}
+        <tr>
+          <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+          <td>{{ solicitud.usuario.nombre }} {{ solicitud.usuario.apellidos }}</td>
+          <td>{{ solicitud.usuario.curp }}</td>
+          <td>{{ solicitud.apoyo.nombre }}</td>
+          <td>
+            {% if solicitud.estado == 'pendiente' %}
+              <span class="badge badge-pendiente"><i class="fas fa-clock me-1"></i>Pendiente</span>
+            {% elif solicitud.estado == 'aprobada' %}
+              <span class="badge badge-aprobada"><i class="fas fa-check me-1"></i>Aprobada</span>
+            {% elif solicitud.estado == 'rechazada' %}
+              <span class="badge badge-rechazada"><i class="fas fa-times me-1"></i>Rechazada</span>
+            {% endif %}
+          </td>
+          <td>{{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}</td>
+          <td>
+            <a href="{% url 'detalle_solicitud_alcalde' solicitud.id %}" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-eye"></i>
+            </a>
+            
+            {% if solicitud.estado == 'rechazada' %}
+            <a href="{% url 'editar_solicitud_alcalde' solicitud.id %}" class="btn btn-sm btn-outline-warning ms-1">
+              <i class="fas fa-edit"></i> Editar
+            </a>
+          {% endif %}
+          
+          </td>
+          
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-muted">No hay solicitudes registradas.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TARJETAS (Móvil) -->
+  <div class="tarjeta-solicitud">
+    {% for solicitud in page_obj %}
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">{{ solicitud.usuario.nombre }} {{ solicitud.usuario.apellidos }}</h5>
+        <p class="mb-1"><strong>CURP:</strong> {{ solicitud.usuario.curp }}</p>
+        <p class="mb-1"><strong>Apoyo:</strong> {{ solicitud.apoyo.nombre }}</p>
+        <p class="mb-1"><strong>Estado:</strong>
+          {% if solicitud.estado == 'pendiente' %}
+            <span class="badge badge-pendiente">Pendiente</span>
+          {% elif solicitud.estado == 'aprobada' %}
+            <span class="badge badge-aprobada">Aprobada</span>
+          {% elif solicitud.estado == 'rechazada' %}
+            <span class="badge badge-rechazada">Rechazada</span>
+          {% endif %}
+        </p>
+        <p class="mb-2"><strong>Fecha:</strong> {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}</p>
+        <a href="{% url 'detalle_solicitud_alcalde' solicitud.id %}" class="btn btn-sm btn-outline-primary">
+          <i class="fas fa-eye"></i>
+        </a>
+        
+        {% if solicitud.estado == 'rechazada' %}
+          <a href="{% url 'detalle_solicitud_alcalde' solicitud.id %}?editar=1" class="btn btn-sm btn-outline-warning ms-1">
+            <i class="fas fa-edit"></i>
+          </a>
+        {% endif %}
+        
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-muted mt-3">No hay solicitudes registradas.</p>
+    {% endfor %}
+  </div>
+
+  <!-- Paginación -->
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if estado %}&estado={{ estado }}{% endif %}{% if search %}&q={{ search }}{% endif %}">
+            <i class="fas fa-chevron-left"></i>
+          </a>
+        </li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}{% if estado %}&estado={{ estado }}{% endif %}{% if search %}&q={{ search }}{% endif %}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if estado %}&estado={{ estado }}{% endif %}{% if search %}&q={{ search }}{% endif %}">
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

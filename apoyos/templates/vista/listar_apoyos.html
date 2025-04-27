@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Todos los Apoyos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <style>
+    :root {
+        --vino: #611232;
+        --oro: #b38e00;
+        --blanco: #ffffff;
+        --gris: #f4f4f4;
+    }
+    body { background-color: var(--gris); }
+
+    .footer {
+        background-color: var(--vino);
+        color: var(--blanco);
+        text-align: center;
+        padding: 15px;
+        margin-top: 40px;
+    }
+    .footer a {
+        color: var(--blanco);
+        margin: 0 10px;
+        text-decoration: none;
+    }
+
+    .card-apoyo {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 1rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border: 1px solid transparent;
+        background-color: white;
+    }
+    .card-apoyo:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        border: 1px solid var(--oro);
+    }
+    .card-apoyo img {
+        max-height: 220px;
+        object-fit: contain;
+        margin-top: 1rem;
+    }
+    .card-apoyo .card-title {
+        color: var(--vino);
+        font-weight: bold;
+        margin-top: 1rem;
+        font-size: 1.1rem;
+        transition: color 0.3s;
+    }
+    .card-apoyo:hover .card-title {
+        color: var(--oro);
+    }
+
+    .btn-vino {
+        background-color: var(--vino);
+        font-weight: bold;
+        border: none;
+        color: white;
+    }
+    .btn-vino:hover {
+        background-color: #8e1c3a;
+        color: #fff;
+    }
+
+    .titulo {
+        color: var(--vino);
+        font-weight: bold;
+        margin-top: 40px;
+        text-align: center;
+    }
+
+    @media (max-width: 768px) {
+        .main-content { padding: 1.5rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Encabezado institucional -->
+<div class="encabezado" style="background-color: var(--vino); color: white; padding: 0.5rem;">
+  <div class="container d-flex justify-content-between align-items-center">
+      <strong><i class="fas fa-landmark me-2"></i>Gobierno Municipal de Mérida</strong>
+      <div>
+          {% if user.is_authenticated %}
+              <a href="{% url 'panel_usuario' %}" class="text-white text-decoration-none me-3">
+                  <i class="fas fa-user-circle"></i> {{ user.nombre }}
+              </a>
+              <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-link text-white text-decoration-none p-0 m-0">
+                      <i class="fas fa-sign-out-alt"></i> Salir
+                  </button>
+              </form>
+          {% else %}
+              <a href="{% url 'login' %}" class="text-white text-decoration-none me-3">
+                  <i class="fas fa-sign-in-alt"></i> Iniciar
+              </a>
+              <a href="{% url 'registro' %}" class="text-white text-decoration-none">
+                  <i class="fas fa-user-plus"></i> Registro
+              </a>
+          {% endif %}
+      </div>
+  </div>
+</div>
+
+<!-- Menú -->
+<nav class="navbar navbar-expand-lg" style="background-color: var(--oro);">
+  <div class="container">
+      <a class="navbar-brand text-white fw-bold" href="#"><i class="fas fa-hand-holding-heart me-2"></i>Apoyos Ciudadanos</a>
+      <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link text-white" href="{% url 'inicio' %}">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="{% url 'listar_apoyos' %}">Apoyos</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="{% url 'listar_noticias_usuario' %}">Noticias</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="{% url 'enviar_sugerencia' %}">Quejas y Sugerencias</a></li>
+            {% if user.rol == 'administrador' %}
+            <li class="nav-item"><a class="nav-link text-white" href="{% url 'panel_administrador' %}">Panel Admin</a></li>
+            {% endif %}
+            {% if user.rol == 'alcalde' %}
+            <li class="nav-item"><a class="nav-link text-white" href="{% url 'panel_alcalde' %}">Panel Alcalde</a></li>
+            {% endif %}
+          </ul>
+      </div>
+  </div>
+</nav>
+
+<!-- Todos los Apoyos -->
+<div class="container">
+  <h2 class="titulo">Todos los Programas y Apoyos</h2>
+  <div class="row mt-4">
+    {% for apoyo in apoyos %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <a href="{% url 'detalle_apoyo' apoyo.id %}" class="text-decoration-none text-dark">
+            <div class="card card-apoyo h-100 text-center p-3">
+                {% if apoyo.imagen %}
+                    <img src="{{ apoyo.imagen.url }}" class="card-img-top mx-auto img-fluid" alt="{{ apoyo.nombre }}">
+                {% else %}
+                    <img src="{% static 'img/default_apoyo.png' %}" class="card-img-top mx-auto img-fluid" alt="Imagen no disponible">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ apoyo.nombre }}</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% empty %}
+    <p class="text-muted text-center">No hay apoyos disponibles por ahora.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p>© 2024 Gobierno de Mérida | Todos los derechos reservados.</p>
+  <a href="#">Política de privacidad</a> | <a href="#">Términos de uso</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Apoyo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap + FontAwesome + Flatpickr -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+
+    <style>
+        body { background-color: #f8f9fa; }
+
+        .titulo-barra {
+            background-color: #611232;
+            color: white;
+            padding: 1.3rem;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-card {
+            background-color: white;
+            padding: 2rem 2.5rem;
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.06);
+        }
+
+        .section-title {
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 1.2rem;
+            font-size: 1.15rem;
+            color: #611232;
+            font-weight: bold;
+        }
+
+        .btn-verde {
+            background-color: #198754;
+            color: white;
+        }
+
+        .btn-verde:hover {
+            background-color: #157347;
+        }
+
+        .btn-agregar {
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .form-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="titulo-barra">
+    <i class="fas fa-edit me-2"></i>Editar Apoyo
+</div>
+
+<div class="container">
+    <div class="form-card">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Sección Información -->
+            <div class="mb-4">
+                <div class="section-title">Información General</div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre del Apoyo</label>
+                    {{ form.nombre }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descripción Corta</label>
+                    {{ form.descripcion_corta }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Descripción Completa</label>
+                    {{ form.descripcion }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Imagen del Apoyo</label>
+                    {{ form.imagen }}
+                    {% if apoyo.imagen %}
+                        <div class="mt-2">
+                            <img src="{{ apoyo.imagen.url }}" alt="Imagen actual" style="max-width: 200px; border-radius: 8px;">
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Formatos permitidos: JPG, PNG. Tamaño máximo recomendado: 2MB.</small>
+                </div>
+            </div>
+
+            <!-- Sección Fechas -->
+            <div class="mb-4">
+                <div class="section-title">Vigencia</div>
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Fecha de Inicio</label>
+                        {{ form.fecha_inicio }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Fecha de Finalización</label>
+                        {{ form.fecha_fin }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Configuración -->
+            <div class="mb-4">
+                <div class="section-title">Configuración</div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tipo de Apoyo</label>
+                        {{ form.tipo }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Disponibilidad</label>
+                        {{ form.disponible }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Requisitos -->
+            <div class="mb-4">
+                <div class="section-title">Requisitos del Apoyo</div>
+                <div id="contenedor-requisitos">
+                    {% for requisito in apoyo.requisitos.all %}
+                        <div class="input-group mb-2">
+                            <input type="text" name="requisitos[]" class="form-control" value="{{ requisito.descripcion }}" required>
+                            <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-success btn-agregar" onclick="agregarRequisito()">
+                    <i class="fas fa-plus me-1"></i>Agregar Requisito
+                </button>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'listar_apoyos' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-verde">
+                    <i class="fas fa-save me-1"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const MAX_DIAS = 93;
+
+document.addEventListener('DOMContentLoaded', function () {
+    const fechaInicioInput = document.getElementById('id_fecha_inicio');
+    const fechaFinInput = document.getElementById('id_fecha_fin');
+    const inicioVal = fechaInicioInput?.value;
+    const finVal = fechaFinInput?.value;
+
+    function setFechaFin(fechaInicio) {
+        const fechaMax = new Date(fechaInicio);
+        fechaMax.setDate(fechaMax.getDate() + MAX_DIAS);
+
+        flatpickr(fechaFinInput, {
+            minDate: fechaInicio,
+            maxDate: fechaMax,
+            dateFormat: "Y-m-d",
+            defaultDate: finVal || null
+        });
+    }
+
+    flatpickr(fechaInicioInput, {
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        defaultDate: inicioVal || null,
+        onChange: function (selectedDates) {
+            setFechaFin(selectedDates[0]);
+        }
+    });
+
+    if (inicioVal) setFechaFin(new Date(inicioVal));
+});
+
+// Agregar nuevos requisitos
+function agregarRequisito() {
+    const contenedor = document.getElementById("contenedor-requisitos");
+    const div = document.createElement("div");
+    div.classList.add("input-group", "mb-2");
+    div.innerHTML = `
+        <input type="text" name="requisitos[]" class="form-control" required>
+        <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    contenedor.appendChild(div);
+}
+
+flatpickr(fechaInicioInput, {
+    dateFormat: "Y-m-d",
+    defaultDate: inicioVal || null,
+    clickOpens: false
+});
+fechaInicioInput.disabled = true;
+</script>
+
+</body>
+</html>

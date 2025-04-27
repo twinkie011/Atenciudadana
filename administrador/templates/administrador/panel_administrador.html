@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel del Administrador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap y FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    {% load static %}
+    <link rel="icon" href="{% static 'img/favicon.png' %}" type="image/png">
+
+<style>
+body {
+    background: linear-gradient(to bottom, #f4f4f4, #ddd);
+    font-size: 1.1rem;
+}
+
+.header {
+    background-color: #611232;
+    color: white;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+    border-radius: 16px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: white;
+    height: 100%;
+}
+.card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+.card i {
+    font-size: 2.5rem;
+}
+
+.btn-custom {
+    border-radius: 25px;
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+}
+
+.dropdown-menu {
+    min-width: 180px;
+}
+.header .dropdown-toggle {
+    text-decoration: none;
+}
+.header .dropdown-toggle::after {
+    display: none;
+}
+.header .dropdown-toggle i {
+    font-size: 2.5rem;
+    margin-right: 0;
+}
+
+.border-hover {
+    transition: all 0.2s ease;
+}
+.border-hover:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    background-color: #f8f9fa;
+}
+
+h5 {
+    font-size: 1.4rem;
+}
+</style>
+
+</head>
+<body>
+
+<!-- Header -->
+<div class="header d-flex justify-content-between align-items-center px-5">
+    <h3 class="m-0"><i class="fas fa-user-cog me-3"></i>Panel del Administrador</h3>
+
+    <div class="dropdown">
+        <a href="#" class="text-white d-flex align-items-center gap-2 dropdown-toggle" role="button" id="perfilDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user-circle"></i>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">
+            <li><a class="dropdown-item" href="{% url 'panel_usuario' %}"><i class="fas fa-id-card me-2"></i>Mi Perfil</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Tarjetas funcionales -->
+<div class="container mt-5">
+    <div class="row g-4 text-center justify-content-center">
+
+        <!-- Gestionar Apoyos -->
+        <div class="col-md-5">
+            <div class="card p-5">
+                <i class="fas fa-hand-holding-heart text-success mb-4"></i>
+                <h5>Gestionar Apoyos</h5>
+                <a href="{% url 'listar_apoyos_admin' %}" class="btn btn-outline-success btn-custom mt-3">Ver Apoyos</a>
+            </div>
+        </div>
+
+        <!-- Tipos de Apoyo -->
+        <div class="col-md-5">
+            <div class="card p-5">
+                <i class="fas fa-tags text-dark mb-4"></i>
+                <h5>Tipos de Apoyo</h5>
+                <a href="{% url 'listar_tipos_apoyo' %}" class="btn btn-outline-dark btn-custom mt-3">Gestionar Tipos</a>
+            </div>
+        </div>
+
+        <!-- Noticias -->
+        <div class="col-md-5">
+            <div class="card p-5">
+                <i class="fas fa-newspaper text-info mb-4"></i>
+                <h5>Noticias</h5>
+                <a href="{% url 'listar_noticias' %}" class="btn btn-outline-info btn-custom mt-3">Ver Noticias</a>
+            </div>
+        </div>
+
+        <!-- Solicitudes -->
+        <div class="col-md-5">
+            <div class="card p-5">
+                <i class="fas fa-file-alt text-warning mb-4"></i>
+                <h5>Solicitudes</h5>
+                <a href="{% url 'listar_solicitudes_admin' %}" class="btn btn-outline-warning btn-custom mt-3">Revisar</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="text-center text-white py-4 mt-5" style="background-color: #611232;">
+    <div class="container">
+        <p class="mb-1">© 2025 Gobierno Municipal de Mérida</p>
+        <p class="mb-0 small">Sistema “Entre Todos” • Secretaría de Educación del Gobierno del Estado de Yucatán</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

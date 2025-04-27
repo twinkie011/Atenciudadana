@@ -1,0 +1,295 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal de Apoyos Ciudadanos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap y FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+
+    <style>
+        :root {
+            --vino: #611232;
+            --oro: #b38e00;
+            --blanco: #ffffff;
+            --gris: #f4f4f4;
+        }
+        body { background-color: var(--gris); }
+        .footer {
+            background-color: var(--vino);
+            color: var(--blanco);
+            text-align: center;
+            padding: 15px;
+            margin-top: 40px;
+        }
+        .footer a {
+            color: var(--blanco);
+            margin: 0 10px;
+            text-decoration: none;
+        }
+        .main-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+        .carousel-inner img {
+            height: auto;
+            max-height: 360px;
+            object-fit: cover;
+        }
+
+        /* Botones Generales */
+        .btn {
+            transition: all 0.3s ease-in-out;
+            box-shadow: none;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Botón VER MÁS (oro) */
+        .btn-ver-mas {
+            background-color: var(--oro);
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            margin-top: 1rem;
+        }
+        .btn-ver-mas:hover {
+            background-color: #8f7000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(179,142,0,0.3);
+        }
+
+        /* Botones VINO */
+        .btn-vino {
+            background-color: #611232;
+            font-weight: bold;
+            border: none;
+        }
+        .btn-vino:hover {
+            background-color: #8e1c3a;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(97,18,50,0.3);
+        }
+
+        /* Botones OUTLINE */
+        .btn-outline-primary {
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--vino);
+            color: white;
+            border-color: var(--vino);
+        }
+
+        /* Hover en TARJETAS APOYOS */
+        .card-apoyo {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border: 1px solid transparent;
+        }
+        .card-apoyo:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border: 1px solid var(--oro);
+        }
+        .card-apoyo img {
+            max-height: 220px;
+            object-fit: contain;
+            margin-top: 1rem;
+        }
+        .card-apoyo .card-title {
+            color: var(--vino);
+            font-weight: bold;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        .card-apoyo:hover .card-title {
+            color: var(--oro);
+        }
+
+        /* Noticias estilo personalizado */
+        .card-noticia {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .card-noticia img {
+            height: 220px;
+            object-fit: cover;
+            width: 100%;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+        }
+        .card-noticia h5 {
+            font-size: 1rem;
+            min-height: 3rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .card-noticia .btn {
+            border-radius: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 1.5rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Encabezado institucional -->
+<div style="background-color: var(--vino); color: white; padding: 0.5rem;">
+    <div class="container d-flex justify-content-between align-items-center">
+        <strong><i class="fas fa-landmark me-2"></i>Gobierno Municipal de Mérida</strong>
+        <div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'panel_usuario' %}" class="text-white text-decoration-none me-3">
+                    <i class="fas fa-user-circle"></i> <span class="hide-text-on-mobile">{{ user.nombre }}</span>
+                </a>
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link text-white text-decoration-none p-0 m-0">
+                        <i class="fas fa-sign-out-alt"></i> <span class="hide-text-on-mobile">Salir</span>
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="text-white text-decoration-none me-3">
+                    <i class="fas fa-sign-in-alt"></i> <span class="hide-text-on-mobile">Iniciar</span>
+                </a>
+                <a href="{% url 'registro' %}" class="text-white text-decoration-none">
+                    <i class="fas fa-user-plus"></i> <span class="hide-text-on-mobile">Registro</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Menú -->
+<nav class="navbar navbar-expand-lg" style="background-color: var(--oro);">
+    <div class="container">
+        <a class="navbar-brand text-white fw-bold" href="#"><i class="fas fa-hand-holding-heart me-2"></i>Apoyos Ciudadanos</a>
+        <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'inicio' %}">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'lista_apoyo' %}">Apoyos</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'listar_noticias_usuario' %}">Noticias</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'enviar_sugerencia' %}">Quejas y Sugerencias</a></li>
+                {% if user.rol == 'administrador' %}
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'panel_administrador' %}">Panel Admin</a></li>
+                {% endif %}
+                {% if user.rol == 'alcalde' %}
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'panel_alcalde' %}">Panel Alcalde</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Carrusel -->
+<div class="container my-3">
+    <div id="bannerCarrusel" class="carousel slide rounded shadow-sm" data-bs-ride="carousel" style="max-width: 1100px; margin: auto;">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img src="{% static 'img/banner1.jpg' %}" class="d-block w-100 rounded" alt="Banner 1">
+            </div>
+            <div class="carousel-item">
+                <img src="{% static 'img/banner2.jpg' %}" class="d-block w-100 rounded" alt="Banner 2">
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarrusel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#bannerCarrusel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+    </div>
+</div>
+
+<div class="text-center text-muted mb-4">
+    “Juntos transformamos Mérida”
+</div>
+
+<!-- Apoyos -->
+<div class="container main-content" id="apoyos">
+    <h2 class="text-center mb-4">Programas y Apoyos Disponibles</h2>
+    <div class="row">
+        {% for apoyo in apoyos %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <a href="{% url 'detalle_apoyo' apoyo.id %}" class="text-decoration-none text-dark">
+                <div class="card card-apoyo h-100 text-center p-3">
+                    {% if apoyo.imagen %}
+                        <img src="{{ apoyo.imagen.url }}" class="card-img-top mx-auto img-fluid" alt="{{ apoyo.nombre }}">
+                    {% else %}
+                        <img src="{% static 'img/default_apoyo.png' %}" class="card-img-top mx-auto img-fluid" alt="Imagen no disponible">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ apoyo.nombre }}</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center">
+        <a href="" class="btn btn-ver-mas">Ver más programas</a>
+    </div>
+</div>
+
+<!-- Noticias -->
+<div class="container main-content" id="noticias">
+    <h2 class="text-center mb-4">Últimas Noticias</h2>
+    <div class="row">
+        {% for noticia in noticias %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card-noticia h-100">
+                {% if noticia.imagen %}
+                <img src="{{ noticia.imagen.url }}" alt="{{ noticia.titulo }}">
+                {% else %}
+                <img src="{% static 'img/default-news.jpg' %}" alt="Imagen por defecto">
+                {% endif %}
+                <div class="p-3">
+                    <h5 class="mb-2">{{ noticia.titulo|truncatechars:60 }}</h5>
+                    <p class="text-muted mb-3">{{ noticia.fecha_publicacion|date:"d/m/Y" }}</p>
+                    <div class="d-grid">
+                        <a href="{% url 'detalle_noticia_usuario' noticia.id %}" class="btn btn-sm btn-vino text-white">
+                            <i class="fas fa-book-open me-1"></i> Leer más
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted text-center">No hay noticias disponibles por ahora.</p>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'listar_noticias_usuario' %}" class="btn btn-ver-mas">Ver más noticias</a>
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>© 2024 Gobierno de Mérida | Todos los derechos reservados.</p>
+    <a href="#">Política de privacidad</a> | <a href="#">Términos de uso</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Solicitud de Apoyo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/favicon.png' %}" type="image/png">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .titulo-barra {
+      background-color: #611232;
+      color: white;
+      padding: 1.3rem;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.4rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .form-card {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.06);
+    }
+    .section-title {
+      font-weight: bold;
+      color: #611232;
+      margin-bottom: 1.2rem;
+      font-size: 1.2rem;
+      border-bottom: 2px solid #e3d7dd;
+      padding-bottom: .3rem;
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .form-control-plaintext {
+      background-color: #f1f1f1;
+      border: 1px solid #dee2e6;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+    }
+    .btn-verde {
+      background-color: #198754;
+      color: white;
+      font-weight: bold;
+    }
+    .btn-verde:hover {
+      background-color: #157347;
+    }
+    .btn-cancelar {
+      background-color: #6c757d;
+      color: white;
+      font-weight: bold;
+    }
+    .btn-cancelar:hover {
+      background-color: #5a6268;
+    }
+    .form-check-label {
+      font-weight: 500;
+    }
+    ul.confirmacion {
+      font-size: 0.95rem;
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="titulo-barra">
+    <i class="fas fa-file-signature me-2"></i> Solicitud de Apoyo: {{ apoyo.nombre }}
+  </div>
+
+  <div class="container">
+    <div class="form-card">
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <!-- Paso 1: Datos Personales -->
+        <div class="mb-5">
+          <div class="section-title"><i class="fas fa-user me-2"></i>Datos Personales</div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombre</label>
+              <input class="form-control-plaintext" readonly value="{{ request.user.nombre }} {{ request.user.apellidos }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">CURP</label>
+              <input class="form-control-plaintext" readonly value="{{ request.user.curp }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Correo</label>
+              <input class="form-control-plaintext" readonly value="{{ request.user.email }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Teléfono</label>
+              <input class="form-control-plaintext" readonly value="{{ request.user.telefono }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Municipio</label>
+              <input class="form-control-plaintext" readonly value="{{ request.user.municipio }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Código Postal</label>
+              <input class="form-control-plaintext" readonly value="{{ request.user.codigo_postal }}">
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 2: Situación Actual -->
+        <div class="mb-5">
+          <div class="section-title"><i class="fas fa-align-left me-2"></i>Situación</div>
+          <label class="form-label">Describe tu situación actual</label>
+          <textarea name="situacion" class="form-control" rows="4" required></textarea>
+        </div>
+
+        <!-- Paso 3: Información Socioeconómica -->
+        <div class="mb-5">
+          <div class="section-title"><i class="fas fa-house-user me-2"></i>Información Socioeconómica</div>
+          <div class="mb-3">
+            <label class="form-label">Ocupación</label>
+            <input type="text" name="ocupacion" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nivel Educativo</label>
+            <select name="educacion" class="form-select" required>
+              <option value="" disabled selected>Selecciona una opción</option>
+              <option value="primaria">Primaria</option>
+              <option value="secundaria">Secundaria</option>
+              <option value="bachillerato">Bachillerato</option>
+              <option value="universidad">Universidad</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tipo de vivienda</label>
+            <select name="vivienda" class="form-select" required>
+              <option value="" disabled selected>Selecciona una opción</option>
+              <option value="propia">Propia</option>
+              <option value="rentada">Rentada</option>
+              <option value="prestada">Prestada</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Paso 4: Documentos -->
+        {% if requisitos %}
+        <div class="mb-5">
+          <div class="section-title"><i class="fas fa-file-pdf me-2 text-danger"></i>Subir Documentos (PDF)</div>
+          {% for req in requisitos %}
+          <div class="mb-3">
+            <label class="form-label">{{ req.descripcion }}</label>
+            <input type="file" name="requisito_{{ req.id }}" accept="application/pdf" class="form-control" required>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Paso 5: Confirmación -->
+        <div class="mb-4">
+          <div class="section-title"><i class="fas fa-check-circle me-2"></i>Confirmación</div>
+
+          <ul class="confirmacion">
+            <li>Declaro haber leído los requisitos del apoyo y que cumplo con ellos.</li>
+            <li>Autorizo la verificación de la información y documentación proporcionada.</li>
+            <li>Entiendo que proporcionar datos falsos puede derivar en la cancelación de mi solicitud.</li>
+            <li>Acepto el tratamiento de mis datos personales conforme al aviso de privacidad institucional.</li>
+          </ul>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="mayor_edad" name="mayor_edad" required>
+            <label class="form-check-label" for="mayor_edad">
+              Declaro que soy mayor de 18 años.
+            </label>
+          </div> 
+
+          <div class="form-check mb-2">
+            <input type="checkbox" name="condiciones" class="form-check-input" id="condiciones" required>
+            <label class="form-check-label" for="condiciones">
+              Confirmo que he leído esta información y acepto los términos de la solicitud.
+            </label>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="privacidad" name="privacidad" required>
+            <label class="form-check-label" for="privacidad">
+              Acepto el tratamiento de mis datos personales conforme al aviso de privacidad.
+            </label>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{% url 'detalle_apoyo' apoyo.id %}" class="btn btn-cancelar">
+            <i class="fas fa-arrow-left me-1"></i> Cancelar
+          </a>
+          <button type="submit" class="btn btn-verde">
+            <i class="fas fa-paper-plane me-1"></i> Enviar Solicitud
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Script para validar PDF -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          const preview = document.createElement('div');
+          preview.classList.add('text-muted', 'small', 'mt-1');
+
+          if (file && file.type === "application/pdf") {
+            preview.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> Archivo cargado: ${file.name}`;
+          } else {
+            preview.innerHTML = `<i class="fas fa-times-circle text-danger me-1"></i> Archivo inválido. Solo se aceptan PDFs.`;
+            e.target.value = "";
+          }
+
+          if (e.target.nextElementSibling?.classList.contains('text-muted')) {
+            e.target.parentNode.removeChild(e.target.nextElementSibling);
+          }
+          e.target.insertAdjacentElement('afterend', preview);
+        });
+      });
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

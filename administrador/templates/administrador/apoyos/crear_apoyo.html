@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Apoyo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap + FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <style>
+        body { background-color: #f8f9fa; }
+        .titulo-barra { background-color: #611232; color: white; padding: 1.3rem; text-align: center; font-weight: bold; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .form-card { background-color: white; padding: 2rem 2.5rem; border-radius: 12px; box-shadow: 0 0 12px rgba(0,0,0,0.06); margin-top: 2rem; margin-bottom: 3rem; }
+        .section-title { border-bottom: 1px solid #dee2e6; padding-bottom: 0.3rem; margin-bottom: 1.3rem; font-size: 1.15rem; color: #611232; font-weight: bold; }
+        .btn-verde { background-color: #198754; color: white; }
+        .btn-verde:hover { background-color: #157347; }
+        .form-label { font-weight: bold; }
+        .flatpickr-input { background-color: white !important; }
+        @media (max-width: 768px) { .form-card { padding: 1.5rem; } .btn { width: 100%; margin-bottom: 0.5rem; } .d-flex.justify-content-between { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<!-- Encabezado -->
+<div class="titulo-barra">
+    <i class="fas fa-plus-circle me-2"></i>Crear Nuevo Apoyo
+</div>
+
+<!-- Formulario -->
+<div class="container">
+    <div class="form-card">
+        <form method="post" enctype="multipart/form-data"> 
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Información general -->
+            <div class="mb-4">
+                <div class="section-title">Información General</div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre del Apoyo</label>
+                    {{ form.nombre }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descripción Corta</label>
+                    {{ form.descripcion_corta }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descripción Completa</label>
+                    {{ form.descripcion }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Imagen del Apoyo</label>
+                    {{ form.imagen }}
+                    <small class="form-text text-muted">Formatos permitidos: JPG, PNG. Tamaño máximo recomendado: 2MB.</small>
+                </div>
+            </div>
+
+            <!-- Vigencia -->
+            <div class="mb-4">
+                <div class="section-title">Vigencia del Apoyo</div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Fecha de Inicio</label>
+                        {{ form.fecha_inicio }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Fecha de Finalización</label>
+                        {{ form.fecha_fin }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración -->
+            <div class="mb-4">
+                <div class="section-title">Configuración</div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tipo de Apoyo</label>
+                        {{ form.tipo }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Disponibilidad</label>
+                        {{ form.disponible }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requisitos -->
+            <div class="mb-4">
+                <div class="section-title">Requisitos del Apoyo</div>
+
+                <div id="contenedor-requisitos">
+                    <div class="input-group mb-2">
+                        <input type="text" name="requisitos[]" class="form-control" placeholder="Ej. Copia de INE">
+                        <button type="button" class="btn btn-outline-danger eliminar-requisito" title="Eliminar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" id="agregar-requisito" class="btn btn-outline-primary btn-sm mt-2">
+                    <i class="fas fa-plus"></i> Agregar Requisito
+                </button>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'listar_apoyos_admin' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-verde">
+                    <i class="fas fa-save me-1"></i> Guardar Apoyo
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const MAX_DIAS = 93;
+    const fechaInicioInput = document.getElementById('id_fecha_inicio');
+    const fechaFinInput = document.getElementById('id_fecha_fin');
+    const fechaInicioValor = fechaInicioInput?.value;
+    const fechaFinValor = fechaFinInput?.value;
+
+    function configurarFechaFin(fechaInicio) {
+        const fechaMax = new Date(fechaInicio);
+        fechaMax.setDate(fechaMax.getDate() + MAX_DIAS);
+        fechaFinInput.disabled = false;
+        flatpickr(fechaFinInput, { minDate: fechaInicio, maxDate: fechaMax, dateFormat: "Y-m-d", defaultDate: fechaFinValor || null });
+    }
+
+    flatpickr(fechaInicioInput, { minDate: "today", dateFormat: "Y-m-d", defaultDate: fechaInicioValor || null, onChange: function (selectedDates) { configurarFechaFin(selectedDates[0]); } });
+    if (fechaInicioValor) { configurarFechaFin(new Date(fechaInicioValor)); } else { fechaFinInput.disabled = true; }
+
+    fechaFinInput?.addEventListener('change', function () {
+        const inicio = new Date(fechaInicioInput.value);
+        const fin = new Date(fechaFinInput.value);
+        if (fin < inicio) { alert("❌ La fecha de finalización no puede ser menor a la de inicio."); fechaFinInput.value = ""; return; }
+        const dias = (fin - inicio) / (1000 * 60 * 60 * 24);
+        if (dias > MAX_DIAS) { alert(`❌ El apoyo no puede durar más de ${MAX_DIAS} días.`); fechaFinInput.value = ""; }
+    });
+
+    document.getElementById('agregar-requisito').addEventListener('click', function () {
+        const contenedor = document.getElementById('contenedor-requisitos');
+        const grupo = document.createElement('div');
+        grupo.className = 'input-group mb-2';
+        grupo.innerHTML = `<input type="text" name="requisitos[]" class="form-control" placeholder="Ej. Comprobante de domicilio"><button type="button" class="btn btn-outline-danger eliminar-requisito" title="Eliminar"><i class="fas fa-times"></i></button>`;
+        contenedor.appendChild(grupo);
+    });
+
+    document.getElementById('contenedor-requisitos').addEventListener('click', function (e) {
+        if (e.target.closest('.eliminar-requisito')) { e.target.closest('.input-group').remove(); }
+    });
+});
+</script>
+
+</body>
+</html>
