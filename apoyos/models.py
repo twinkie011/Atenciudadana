@@ -48,18 +48,19 @@ class Apoyo(models.Model):
         verbose_name_plural = "Apoyos"
 
     def clean(self):
-        # 1. Que la fecha de fin no sea anterior a la de inicio
+        # Validar que fecha_fin no sea anterior a fecha_inicio
         if self.fecha_fin < self.fecha_inicio:
             raise ValidationError("La fecha de finalización no puede ser anterior a la fecha de inicio.")
 
-        # 2. Que la fecha de inicio no sea anterior a hoy
-        if self.fecha_inicio < date.today():
+        # Validar fecha_inicio solo al crear un nuevo objeto
+        if self.pk is None and self.fecha_inicio < date.today():
             raise ValidationError("La fecha de inicio no puede estar en el pasado.")
 
-        # 3. Que no exceda 3 meses de duración
+        # Validar duración máxima
         delta = self.fecha_fin - self.fecha_inicio
         if delta.days > 93:
             raise ValidationError("Un apoyo no puede durar más de 3 meses (93 días).")
+
 
     def __str__(self):
         return self.nombre
@@ -79,7 +80,7 @@ class Solicitud(models.Model):
     ]
     estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente', verbose_name="Estado")
 
-    # ✅ CAMPOS NUEVOS
+    # ✅ Información socioeconómica
     situacion = models.TextField(verbose_name="Situación actual", blank=True)
     ocupacion = models.CharField(max_length=100, verbose_name="Ocupación", blank=True)
     educacion = models.CharField(max_length=50, verbose_name="Nivel educativo", blank=True)
@@ -87,8 +88,14 @@ class Solicitud(models.Model):
     mayor_edad = models.BooleanField(default=False)
     condiciones = models.BooleanField(default=False)
 
+    # ✅ Información de INE
+    clave_elector = models.CharField(max_length=18, verbose_name="Clave de Elector", blank=True)
+    seccion = models.CharField(max_length=4, verbose_name="Sección Electoral", blank=True)
+    vigencia = models.CharField(max_length=9, verbose_name="Vigencia de INE", blank=True)
+
+    # ✅ Revisión
     motivo_rechazo = models.TextField(blank=True, null=True, verbose_name="Motivo de rechazo")
-    
+
     class Meta:
         ordering = ['-fecha_solicitud']
         verbose_name = "Solicitud"
@@ -96,7 +103,6 @@ class Solicitud(models.Model):
 
     def __str__(self):
         return f"{self.usuario.email} - {self.apoyo.nombre} ({self.estado})"
-
 
 # -----------------------------------------------
 # MODELO: Requisito (para cada apoyo)
@@ -182,3 +188,18 @@ class QuejaSugerencia(models.Model):
 
     def __str__(self):
         return f"{self.tipo.title()} de {self.usuario.nombre}"
+
+
+from django.db import models
+
+class Banner(models.Model):
+    titulo = models.CharField(max_length=100, blank=True)
+    imagen = models.ImageField(upload_to='banners/')
+    orden = models.PositiveIntegerField(default=0)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['orden']
+
+    def __str__(self):
+        return self.titulo or f"Banner {self.id}"

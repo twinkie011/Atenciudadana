@@ -8,7 +8,7 @@ from django.contrib.auth.views import LogoutView
 urlpatterns = [
     path('registro/', registro_view, name='registro'),
     path('login/', LoginUsuarioView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(next_page='/login/'), name='logout'),
+    path('logout/', LogoutView.as_view(next_page='inicio'), name='logout'),
     path('panel/', panel_usuario, name='panel_usuario'),
 
     # AJAX endpoints

@@ -82,7 +82,7 @@
     <div class="form-card">
       <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
-
+      
         <!-- Paso 1: Datos Personales -->
         <div class="mb-5">
           <div class="section-title"><i class="fas fa-user me-2"></i>Datos Personales</div>
@@ -113,88 +113,101 @@
             </div>
           </div>
         </div>
-
-        <!-- Paso 2: Situación Actual -->
+      
+        <!-- Paso 2: Campos del formulario -->
         <div class="mb-5">
           <div class="section-title"><i class="fas fa-align-left me-2"></i>Situación</div>
-          <label class="form-label">Describe tu situación actual</label>
-          <textarea name="situacion" class="form-control" rows="4" required></textarea>
+          <div class="mb-3">
+            {{ form.situacion.label_tag }}
+            {{ form.situacion }}
+            {{ form.situacion.errors }}
+          </div>
         </div>
-
-        <!-- Paso 3: Información Socioeconómica -->
+      
         <div class="mb-5">
           <div class="section-title"><i class="fas fa-house-user me-2"></i>Información Socioeconómica</div>
           <div class="mb-3">
-            <label class="form-label">Ocupación</label>
-            <input type="text" name="ocupacion" class="form-control" required>
+            {{ form.ocupacion.label_tag }}
+            {{ form.ocupacion }}
+            {{ form.ocupacion.errors }}
           </div>
           <div class="mb-3">
-            <label class="form-label">Nivel Educativo</label>
-            <select name="educacion" class="form-select" required>
-              <option value="" disabled selected>Selecciona una opción</option>
-              <option value="primaria">Primaria</option>
-              <option value="secundaria">Secundaria</option>
-              <option value="bachillerato">Bachillerato</option>
-              <option value="universidad">Universidad</option>
-            </select>
+            {{ form.educacion.label_tag }}
+            {{ form.educacion }}
+            {{ form.educacion.errors }}
           </div>
           <div class="mb-3">
-            <label class="form-label">Tipo de vivienda</label>
-            <select name="vivienda" class="form-select" required>
-              <option value="" disabled selected>Selecciona una opción</option>
-              <option value="propia">Propia</option>
-              <option value="rentada">Rentada</option>
-              <option value="prestada">Prestada</option>
-            </select>
+            {{ form.vivienda.label_tag }}
+            {{ form.vivienda }}
+            {{ form.vivienda.errors }}
           </div>
         </div>
-
+      
+        <div class="mb-5">
+          <div class="section-title"><i class="fas fa-id-card me-2"></i>Información de la INE</div>
+          <div class="mb-3">
+            {{ form.clave_elector.label_tag }}
+            {{ form.clave_elector }}
+            {{ form.clave_elector.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.seccion.label_tag }}
+            {{ form.seccion }}
+            {{ form.seccion.errors }}
+          </div>
+          <div class="mb-3">
+            {{ form.vigencia.label_tag }}
+            {{ form.vigencia }}
+            {{ form.vigencia.errors }}
+          </div>
+        </div>
+      
         <!-- Paso 4: Documentos -->
         {% if requisitos %}
         <div class="mb-5">
-          <div class="section-title"><i class="fas fa-file-pdf me-2 text-danger"></i>Subir Documentos (PDF)</div>
+          <div class="section-title"><i class="fas fa-file-pdf me-2 text-danger"></i>Subir Documentos o Fotos</div>
           {% for req in requisitos %}
           <div class="mb-3">
             <label class="form-label">{{ req.descripcion }}</label>
-            <input type="file" name="requisito_{{ req.id }}" accept="application/pdf" class="form-control" required>
+            <input type="file" name="requisito_{{ req.id }}" accept="application/pdf,image/*" capture="environment" class="form-control" required>
+
           </div>
           {% endfor %}
         </div>
         {% endif %}
-
+      
         <!-- Paso 5: Confirmación -->
         <div class="mb-4">
           <div class="section-title"><i class="fas fa-check-circle me-2"></i>Confirmación</div>
-
+      
           <ul class="confirmacion">
             <li>Declaro haber leído los requisitos del apoyo y que cumplo con ellos.</li>
             <li>Autorizo la verificación de la información y documentación proporcionada.</li>
             <li>Entiendo que proporcionar datos falsos puede derivar en la cancelación de mi solicitud.</li>
             <li>Acepto el tratamiento de mis datos personales conforme al aviso de privacidad institucional.</li>
           </ul>
-
+      
           <div class="form-check mb-2">
-            <input class="form-check-input" type="checkbox" id="mayor_edad" name="mayor_edad" required>
-            <label class="form-check-label" for="mayor_edad">
-              Declaro que soy mayor de 18 años.
-            </label>
-          </div> 
-
-          <div class="form-check mb-2">
-            <input type="checkbox" name="condiciones" class="form-check-input" id="condiciones" required>
-            <label class="form-check-label" for="condiciones">
-              Confirmo que he leído esta información y acepto los términos de la solicitud.
-            </label>
+            {{ form.mayor_edad }}
+            {{ form.mayor_edad.label_tag }}
+            {{ form.mayor_edad.errors }}
           </div>
-
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="privacidad" name="privacidad" required>
+      
+          <div class="form-check mb-2">
+            {{ form.condiciones }}
+            {{ form.condiciones.label_tag }}
+            {{ form.condiciones.errors }}
+          </div>
+      
+          <!-- Este campo no está en el modelo/form, por eso fallaba -->
+          <div class="form-check mb-2">
+            <input type="checkbox" name="privacidad" class="form-check-input" id="privacidad" required>
             <label class="form-check-label" for="privacidad">
               Acepto el tratamiento de mis datos personales conforme al aviso de privacidad.
             </label>
           </div>
         </div>
-
+      
         <!-- Botones -->
         <div class="d-flex justify-content-between mt-4">
           <a href="{% url 'detalle_apoyo' apoyo.id %}" class="btn btn-cancelar">
@@ -208,31 +221,107 @@
     </div>
   </div>
 
-  <!-- Script para validar PDF -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('input[type="file"]').forEach(input => {
-        input.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          const preview = document.createElement('div');
-          preview.classList.add('text-muted', 'small', 'mt-1');
+<!-- ✅ Validación de PDFs -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        const preview = document.createElement('div');
+        preview.classList.add('text-muted', 'small', 'mt-1');
 
-          if (file && file.type === "application/pdf") {
-            preview.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> Archivo cargado: ${file.name}`;
-          } else {
-            preview.innerHTML = `<i class="fas fa-times-circle text-danger me-1"></i> Archivo inválido. Solo se aceptan PDFs.`;
-            e.target.value = "";
-          }
+        if (file && file.type === "application/pdf") {
+          preview.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> Archivo cargado: ${file.name}`;
+        } else {
+          preview.innerHTML = `<i class="fas fa-times-circle text-danger me-1"></i> Archivo inválido. Solo se aceptan PDFs.`;
+          e.target.value = "";
+        }
 
-          if (e.target.nextElementSibling?.classList.contains('text-muted')) {
-            e.target.parentNode.removeChild(e.target.nextElementSibling);
-          }
-          e.target.insertAdjacentElement('afterend', preview);
-        });
+        if (e.target.nextElementSibling?.classList.contains('text-muted')) {
+          e.target.parentNode.removeChild(e.target.nextElementSibling);
+        }
+        e.target.insertAdjacentElement('afterend', preview);
       });
     });
-  </script>
+  });
+</script>
+
+<!-- ✅ Validaciones de INE (Claves, Sección, Vigencia) -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const claveInput = document.getElementById("id_clave_elector");
+    const seccionInput = document.getElementById("id_seccion");
+    const vigenciaInput = document.getElementById("id_vigencia");
+
+    if (claveInput) {
+      claveInput.addEventListener("input", () => {
+        claveInput.value = claveInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      });
+    }
+
+    if (seccionInput) {
+      seccionInput.addEventListener("input", () => {
+        seccionInput.value = seccionInput.value.replace(/\D/g, "").slice(0, 4);
+      });
+    }
+
+    if (vigenciaInput) {
+      vigenciaInput.addEventListener("input", () => {
+        let val = vigenciaInput.value.replace(/\D/g, "");
+        if (val.length > 4) {
+          val = val.slice(0, 4) + '-' + val.slice(4, 8);
+        }
+        vigenciaInput.value = val.slice(0, 9);
+      });
+    }
+
+    document.querySelector("form").addEventListener("submit", function (e) {
+      const clave = claveInput?.value.trim() || "";
+      const seccion = seccionInput?.value.trim() || "";
+      const vigencia = vigenciaInput?.value.trim() || "";
+      const anioActual = new Date().getFullYear();
+
+      if (clave && !/^[A-Z0-9]{18}$/.test(clave)) {
+        alert("❌ La clave de elector debe tener exactamente 18 caracteres (solo letras mayúsculas y números).");
+        claveInput.focus();
+        e.preventDefault();
+        return;
+      }
+
+      if (seccion && !/^\d{4}$/.test(seccion)) {
+        alert("❌ La sección debe contener exactamente 4 dígitos numéricos.");
+        seccionInput.focus();
+        e.preventDefault();
+        return;
+      }
+
+      if (vigencia && /^\d{4}-\d{4}$/.test(vigencia)) {
+        const [a1, a2] = vigencia.split('-').map(Number);
+        if (a1 < anioActual) {
+          alert(`❌ El primer año debe ser igual o mayor a ${anioActual}.`);
+          vigenciaInput.focus();
+          e.preventDefault();
+          return;
+        }
+        if (a2 <= a1) {
+          alert("❌ El segundo año debe ser mayor que el primero.");
+          vigenciaInput.focus();
+          e.preventDefault();
+          return;
+        }
+      } else {
+        alert("❌ La vigencia debe estar en el formato AAAA-AAAA. Ejemplo: 2026-2036.");
+        vigenciaInput.focus();
+        e.preventDefault();
+        return;
+      }
+    });
+  });
+</script>
+
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

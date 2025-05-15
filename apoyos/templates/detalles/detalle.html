@@ -151,12 +151,18 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'inicio' %}">Inicio</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="{% url 'listar_apoyos' %}">Apoyos</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'lista_apoyo' %}">Apoyos</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'listar_noticias_usuario' %}">Noticias</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="{% url 'enviar_sugerencia' %}">Quejas y Sugerencias</a></li>
+
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'enviar_sugerencia' %}">Quejas y Sugerencias</a>
+                </li>
+                {% endif %}
+
                 {% if user.rol == 'administrador' %}
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'panel_administrador' %}">Panel Admin</a></li>
                 {% endif %}
+
                 {% if user.rol == 'alcalde' %}
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'panel_alcalde' %}">Panel Alcalde</a></li>
                 {% endif %}

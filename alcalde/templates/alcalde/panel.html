@@ -84,7 +84,15 @@ body {
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">
             <li><a class="dropdown-item" href="{% url 'panel_usuario' %}"><i class="fas fa-id-card me-2"></i>Mi Perfil</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión</a></li>
+            <li>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión
+                  </button>
+                </form>
+              </li>
+              
         </ul>
     </div>
 </div>
@@ -131,6 +139,16 @@ body {
             </div>
         </div>
         
+        <!-- Banners -->
+        <div class="col-md-4">
+            <div class="card p-4">
+                <i class="fas fa-images text-primary mb-3"></i>
+                <h5>Gestionar Banners</h5>
+                <a href="{% url 'lista_banners' %}" class="btn btn-outline-primary btn-sm btn-custom mt-2">Administrar</a>
+            </div>
+        </div>
+
+
         <!-- Quejas y Sugerencias -->
         <div class="col-md-4">
             <div class="card p-4">

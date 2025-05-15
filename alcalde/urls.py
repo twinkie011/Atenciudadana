@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import panel_alcalde, crear_administrador_view,listado_administradores_view,editar_administrador_view,eliminar_administrador_view,listar_solicitudes_view,detalle_solicitud_alcalde,editar_solicitud_alcalde,apoyos_mas_solicitados,generar_pdf_apoyo,generar_pdf_apoyos_totales,listar_sugerencias_view
+from apoyos import views as banner_views
 from . import views 
 
 urlpatterns = [
@@ -22,9 +23,15 @@ urlpatterns = [
     path('apoyo/<int:apoyo_id>/pdf/', generar_pdf_apoyo, name='generar_pdf_apoyo'),
     path('estadisticas/pdf-apoyos/', generar_pdf_apoyos_totales, name='generar_pdf_apoyos_totales'),
     path('sugerencias/', listar_sugerencias_view, name='listar_sugerencias'),
+    
+    
+    path('banners/', banner_views.lista_banners, name='lista_banners'),
+    path('banners/crear/', banner_views.crear_banner, name='crear_banner'),
+    path('banners/eliminar/<int:banner_id>/', banner_views.eliminar_banner, name='eliminar_banner'),
+    
 
 
-
+    path('exportar-solicitudes-excel/', views.exportar_excel_solicitudes, name='exportar_excel_solicitudes'),
 
 
 

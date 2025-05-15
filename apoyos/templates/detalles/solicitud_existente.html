@@ -93,15 +93,33 @@
 </div>
 
 <div class="container">
+
+    {% if messages %}
+      <div class="mb-4">
+        {% for message in messages %}
+          <div class="alert alert-warning text-dark text-center fw-bold rounded shadow-sm">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     <div class="card-custom">
         <i class="fas fa-exclamation-triangle"></i>
+        {% if espera %}
+        <h3>Espera para volver a solicitar</h3>
+        <p class="small-text">Debes esperar a que su solicitud sea revisada para poder volver a solicitar este apoyo.</p>
+        {% else %}
         <h3>Ya has solicitado este apoyo</h3>
-        <p class="small-text">No puedes enviar otra solicitud para el mismo apoyo mientras la actual esté en revisión o ya haya sido procesada.</p>
+        <p class="small-text">No puedes enviar otra solicitud mientras la actual esté en revisión o ya fue aprobada.</p>
+        {% endif %}
+
         <a href="javascript:history.back();" class="btn btn-volver mt-3">
              Volver
-           </a>
+        </a>
     </div>
 </div>
+
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

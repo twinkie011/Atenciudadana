@@ -86,7 +86,14 @@ h5 {
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="perfilDropdown">
             <li><a class="dropdown-item" href="{% url 'panel_usuario' %}"><i class="fas fa-id-card me-2"></i>Mi Perfil</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Cerrar sesión</a></li>
+            <li>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión
+                  </button>
+                </form>
+              </li>
         </ul>
     </div>
 </div>
@@ -128,6 +135,16 @@ h5 {
                 <i class="fas fa-file-alt text-warning mb-4"></i>
                 <h5>Solicitudes</h5>
                 <a href="{% url 'listar_solicitudes_admin' %}" class="btn btn-outline-warning btn-custom mt-3">Revisar</a>
+            </div>
+        </div>
+
+        
+        <!-- Gestionar Banners -->
+        <div class="col-md-5">
+            <div class="card p-5">
+                <i class="fas fa-images text-primary mb-4"></i>
+                <h5>Gestión de Banners</h5>
+                <a href="{% url 'lista_banners' %}" class="btn btn-outline-primary btn-custom mt-3">Ver Banners</a>
             </div>
         </div>
 

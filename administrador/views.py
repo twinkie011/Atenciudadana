@@ -52,9 +52,11 @@ def crear_apoyo(request):
 
 def editar_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(Apoyo, id=apoyo_id)
+
     if request.method == 'POST':
-        form = ApoyoForm(request.POST, request.FILES, instance=apoyo) 
+        form = ApoyoForm(request.POST, request.FILES, instance=apoyo, editar=True)  # 👈 AQUI
         requisitos = request.POST.getlist('requisitos[]')
+
         if form.is_valid():
             form.save()
             apoyo.requisitos.all().delete()
@@ -66,11 +68,13 @@ def editar_apoyo(request, apoyo_id):
         else:
             messages.error(request, "Por favor revisa los campos.")
     else:
-        form = ApoyoForm(instance=apoyo)
+        form = ApoyoForm(instance=apoyo, editar=True)  # 👈 AQUI también
+
     return render(request, 'administrador/apoyos/editar_apoyo.html', {
         'form': form,
         'apoyo': apoyo
     })
+
 
 def eliminar_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(Apoyo, id=apoyo_id)
@@ -265,3 +269,31 @@ def editar_solicitud_admin(request, solicitud_id):
         'documentos': documentos,
         'modo_edicion': modo_edicion
     })
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from apoyos.models import Banner
+from apoyos.forms import BannerForm
+from django.contrib.auth.decorators import user_passes_test
+
+def es_admin_o_alcalde(user):
+    return user.rol in ['administrador', 'alcalde']
+
+@user_passes_test(es_admin_o_alcalde)
+def lista_banners(request):
+    banners = Banner.objects.all()
+    return render(request, 'banners/lista.html', {'banners': banners})
+
+@user_passes_test(es_admin_o_alcalde)
+def crear_banner(request):
+    form = BannerForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        form.save()
+        return redirect('lista_banners')
+    return render(request, 'banners/form.html', {'form': form})
+
+@user_passes_test(es_admin_o_alcalde)
+def eliminar_banner(request, banner_id):
+    banner = get_object_or_404(Banner, id=banner_id)
+    banner.delete()
+    return redirect('lista_banners')

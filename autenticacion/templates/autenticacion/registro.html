@@ -50,6 +50,19 @@
             font-size: 1.1rem;
         }
 
+        .password-checklist {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .password-checklist i {
+            width: 20px;
+        }
+
+        .text-success {
+            color: #198754 !important;
+        }
+
         @media (max-width: 768px) {
             .register-card .card-body {
                 padding: 1.5rem;
@@ -139,11 +152,28 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Contraseña:</label>
-                        {{ form.password1 }}
+                        <div class="input-group">
+                            {{ form.password1 }}
+                            <span class="input-group-text" onclick="togglePassword('id_password1', this)" style="cursor: pointer;">
+                                <i class="fas fa-eye-slash"></i>
+                            </span>
+                        </div>
+                        <div class="password-checklist" id="password-checklist">
+                            <div><i class="fas fa-times text-muted" id="length-check"></i> Mínimo 8 caracteres</div>
+                            <div><i class="fas fa-times text-muted" id="number-check"></i> Al menos un número</div>
+                            <div><i class="fas fa-times text-muted" id="uppercase-check"></i> Una mayúscula</div>
+                            <div><i class="fas fa-times text-muted" id="lowercase-check"></i> Una minúscula</div>
+                        </div>
                     </div>
+
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Confirmar Contraseña:</label>
-                        {{ form.password2 }}
+                        <div class="input-group">
+                            {{ form.password2 }}
+                            <span class="input-group-text" onclick="togglePassword('id_password2', this)" style="cursor: pointer;">
+                                <i class="fas fa-eye-slash"></i>
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -161,7 +191,32 @@
 
 <!-- Validaciones JS -->
 <script>
+    function togglePassword(inputId, iconElement) {
+        const input = document.getElementById(inputId);
+        const icon = iconElement.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        const passwordInput = document.getElementById('id_password1');
+
+        passwordInput?.addEventListener('input', function () {
+            const val = this.value;
+
+            document.getElementById('length-check').className = val.length >= 8 ? 'fas fa-check text-success' : 'fas fa-times text-muted';
+            document.getElementById('number-check').className = /\d/.test(val) ? 'fas fa-check text-success' : 'fas fa-times text-muted';
+            document.getElementById('uppercase-check').className = /[A-Z]/.test(val) ? 'fas fa-check text-success' : 'fas fa-times text-muted';
+            document.getElementById('lowercase-check').className = /[a-z]/.test(val) ? 'fas fa-check text-success' : 'fas fa-times text-muted';
+        });
+
         const numericFields = ['id_codigo_postal', 'id_telefono'];
         numericFields.forEach(id => {
             const field = document.getElementById(id);

@@ -115,3 +115,24 @@ def editar_perfil(request):
     else:
         form = EditarPerfilForm(instance=request.user)
     return render(request, 'usuarios/editar_perfil.html', {'form': form})
+
+
+from django.contrib.auth.views import PasswordResetView
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+
+class CustomPasswordResetView(PasswordResetView):
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        User = get_user_model()
+        if not User.objects.filter(email=email).exists():
+            messages.error(self.request, 'Este correo no está registrado en el sistema.')
+            return self.form_invalid(form)
+        return super().form_valid(form)
+    
+
+from django.contrib.auth.views import PasswordResetConfirmView
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'recuperacion/cambiar_contrasena.html'
+

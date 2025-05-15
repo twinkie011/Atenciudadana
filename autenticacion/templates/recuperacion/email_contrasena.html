@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Restablecer Contraseña</title>
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .header {
+            background-color: #611232;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .header img {
+            max-height: 50px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #611232;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <p>Hola {{ user.email }},</p>
+
+        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta registrada en el sistema del <strong>Gobierno de Tetiz</strong>.</p>
+
+        <p>Para continuar con el proceso, por favor haz clic en el siguiente botón. Este enlace estará activo únicamente durante <strong>5 minutos</strong> por seguridad:</p>
+
+        <p style="text-align: center;">
+            <a href="{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}" class="btn">Restablecer contraseña</a>
+        </p>
+
+        <p>Si tú no solicitaste este cambio, puedes ignorar este mensaje y no se realizará ninguna modificación.</p>
+
+        <p class="footer">Este mensaje fue generado automáticamente por el sistema. Por favor, no respondas a este correo.<br>Gobierno de Tetiz</p>
+    </div>
+</div>
+</body>
+</html>

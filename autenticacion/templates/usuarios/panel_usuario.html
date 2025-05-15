@@ -68,32 +68,57 @@
     display: block;
   }
 
-  @media (max-width: 480px) {
-    .perfil-header h3, .perfil-header small {
-      font-size: 0.95rem;
-    }
-
-    .perfil-header i {
-      font-size: 2rem;
-    }
-
-    .btn-editar {
-      font-size: 0.85rem;
-      width: 100%;
-    }
-
-    .hide-text-on-mobile {
-      display: none;
-    }
-
-    .card-body p, .card-header {
-      font-size: 0.9rem;
-    }
-
-    .navbar-nav .nav-link {
-      font-size: 0.9rem;
-    }
+@media (max-width: 480px) {
+  .perfil-header h3 {
+    font-size: 1.1rem;
   }
+
+  .perfil-header small {
+    font-size: 0.95rem;
+  }
+
+  .perfil-header i {
+    font-size: 2.2rem;
+  }
+
+  .btn-editar {
+    font-size: 0.95rem;
+    width: 100%;
+    padding: 0.5rem;
+  }
+
+  .card-body p,
+  .card-header {
+    font-size: 1rem;
+  }
+
+  .navbar-nav .nav-link {
+    font-size: 0.95rem;
+  }
+
+  .list-group-item {
+    font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .btn-outline-primary {
+    font-size: 0.95rem;
+    padding: 0.45rem 1rem;
+  }
+
+  footer small {
+    font-size: 0.9rem;
+  }
+
+  .hide-text-on-mobile {
+    display: none;
+  }
+}
+
+
+
+
+
 </style>
 
 <!-- NAVBAR -->
@@ -106,9 +131,9 @@
     <div class="collapse navbar-collapse" id="navbarUsuario">
       <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link text-white" href="{% url 'inicio' %}"><i class="fas fa-home me-1"></i>Inicio</a></li>
-        <li class="nav-item"><a class="nav-link text-white" href="#apoyos"><i class="fas fa-hands-helping me-1"></i>Apoyos</a></li>
-        <li class="nav-item"><a class="nav-link text-white" href="#noticias"><i class="fas fa-newspaper me-1"></i>Noticias</a></li>
-        <li class="nav-item"><a class="nav-link text-white" href="#contacto"><i class="fas fa-envelope me-1"></i>Contacto</a></li>
+        <li class="nav-item"><a class="nav-link text-white" href="{% url 'lista_apoyo' %}"><i class="fas fa-hands-helping me-1"></i>Apoyos</a></li>
+        <li class="nav-item"><a class="nav-link text-white" href="{% url 'listar_noticias_usuario' %}"><i class="fas fa-newspaper me-1"></i>Noticias</a></li>
+        <li class="nav-item"><a class="nav-link text-white" href="{% url 'enviar_sugerencia' %}"><i class="fas fa-envelope me-1"></i>Quejas y Sugerencias</a></li>
       
         <!-- Solo Administrador -->
         {% if user.rol == 'administrador' %}
@@ -138,7 +163,15 @@
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="#"><i class="fas fa-id-badge me-1"></i> Perfil</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión</a></li>
+            <li>
+              <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item text-danger">
+                  <i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión
+                </button>
+              </form>
+            </li>
+            
           </ul>
         </li>
       </ul>

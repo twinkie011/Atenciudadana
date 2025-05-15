@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recuperar Contraseña</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <script src="https://kit.fontawesome.com/710ab37231.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+        .card {
+            max-width: 520px;
+            margin: 4rem auto;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
+        .btn-dark {
+            background-color: #611232;
+            border: none;
+        }
+        .btn-dark:hover {
+            background-color: #4e0e26;
+        }
+        .btn-secondary {
+            background-color: #ccc;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #aaa;
+        }
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .logo img {
+            max-height: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h4 class="text-center mb-4"><i class="fas fa-unlock-alt me-2"></i> Recuperar Contraseña</h4>
+
+    {% with view_name=request.resolver_match.view_name %}
+        {% if form and not validlink %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-dark">Enviar enlace</button>
+                    <a href="{% url 'login' %}" class="btn btn-secondary">Regresar</a>
+                </div>
+            </form>
+
+        {% elif validlink and form %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-dark">Cambiar contraseña</button>
+                    <a href="{% url 'login' %}" class="btn btn-secondary">Regresar</a>
+                </div>
+            </form>
+
+        {% elif validlink is False %}
+            <p class="text-danger text-center">El enlace de recuperación no es válido o ya fue utilizado.</p>
+
+        {% elif view_name == 'password_reset_done' %}
+            <p class="text-success text-center">Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.</p>
+
+        {% elif view_name == 'password_reset_complete' %}
+            <p class="text-success text-center">Tu contraseña ha sido cambiada con éxito. Ya puedes <a href="{% url 'login' %}">iniciar sesión</a>.</p>
+        {% endif %}
+    {% endwith %}
+</div>
+</body>
+</html>

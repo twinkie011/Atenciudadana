@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.core.paginator import Paginator
 from django.contrib import messages
+from datetime import timedelta
 
 from .models import Apoyo, Solicitud, TipoApoyo, Requisito, DocumentoRequisito
 from .forms import CuestionarioSolicitudForm, TipoApoyoForm
@@ -38,26 +39,32 @@ def detalle_apoyo(request, apoyo_id):
 # SOLICITAR APOYO (solo usuarios logueados)
 # Incluye cuestionario y requisitos con PDF
 # -----------------------------------------------
+from django.utils.timezone import now
+from datetime import timedelta
+
 @login_required
 def solicitar_apoyo(request, apoyo_id):
     apoyo = get_object_or_404(Apoyo, id=apoyo_id)
     requisitos = apoyo.requisitos.all()
 
-    # Buscar solicitud existente (excepto si fue rechazada)
+    # Buscar la última solicitud para este usuario y apoyo
     solicitud_existente = Solicitud.objects.filter(
         usuario=request.user,
         apoyo=apoyo
-    ).exclude(estado='rechazada').first()
+    ).order_by('-fecha_solicitud').first()
 
-    if solicitud_existente:
-        if solicitud_existente.estado == 'aprobada':
-            # Mostrar un mensaje especial si ya fue aprobado
-            return render(request, 'detalles/solicitud_aprobada.html', {'apoyo': apoyo})
-        else:
-            # Si está pendiente, mensaje normal
-            return render(request, 'detalles/solicitud_existente.html', {'apoyo': apoyo})
+    if solicitud_existente and solicitud_existente.estado in ['aprobada', 'rechazada', 'pendiente']:
+        tiempo_transcurrido = now() - solicitud_existente.fecha_solicitud
 
-    # Si no hay solicitud previa válida, permite solicitar
+        if solicitud_existente.estado == 'pendiente' or tiempo_transcurrido < timedelta(days=1):
+            horas_restantes = 24 - int(tiempo_transcurrido.total_seconds() // 3600)
+            return render(request, 'detalles/solicitud_existente.html', {
+                'apoyo': apoyo,
+                'espera': tiempo_transcurrido < timedelta(days=1),
+                'horas_restantes': horas_restantes if tiempo_transcurrido < timedelta(days=1) else 0
+            })
+
+    # Si no hay solicitud válida reciente, permite nueva solicitud
     if request.method == 'POST':
         form = CuestionarioSolicitudForm(request.POST)
         archivos = request.FILES
@@ -72,11 +79,22 @@ def solicitar_apoyo(request, apoyo_id):
                 vivienda=request.POST.get('vivienda', ''),
                 mayor_edad=request.POST.get('mayor_edad') == 'on',
                 condiciones=request.POST.get('condiciones') == 'on',
+                clave_elector=request.POST.get('clave_elector', ''),
+                seccion=request.POST.get('seccion', ''),
+                vigencia=request.POST.get('vigencia', ''),
             )
 
             for req in requisitos:
                 archivo = archivos.get(f'requisito_{req.id}')
                 if archivo:
+                    if archivo.content_type not in ['application/pdf', 'image/jpeg', 'image/png']:
+                        messages.error(request, f"❌ El archivo para '{req.descripcion}' no es válido. Solo se aceptan PDF o imágenes.")
+                        return render(request, 'detalles/formulario_solicitud.html', {
+                            'form': form,
+                            'apoyo': apoyo,
+                            'requisitos': requisitos
+                        })
+
                     DocumentoRequisito.objects.create(
                         solicitud=solicitud,
                         requisito=req,
@@ -202,12 +220,54 @@ def reemplazar_documento(request, id):
     return redirect('panel_usuario')
 
 
-from apoyos.models import Apoyo
-from noticias.models import Noticia  # 👈 Asegúrate de importar Noticia
+from django.utils.timezone import now
 from django.shortcuts import render
+from apoyos.models import Apoyo
+from noticias.models import Noticia
 
 def inicio(request):
-    apoyos = Apoyo.objects.order_by('-fecha_inicio')[:6]
-    noticias = Noticia.objects.order_by('-fecha_publicacion')[:6]  # Carga 6 noticias más recientes
-    return render(request, 'panel_usaurio.html', {'apoyos': apoyos, 'noticias': noticias})
+    apoyos = Apoyo.objects.filter(
+        disponible=True,
+        publicado=True,
+        fecha_inicio__lte=now().date(),
+        fecha_fin__gte=now().date()
+    ).order_by('-fecha_inicio')[:6]
+
+    noticias = Noticia.objects.order_by('-fecha_publicacion')[:6]
+    banners = Banner.objects.all().order_by('orden')
+
+    return render(request, 'panel_usaurio.html', {
+        'apoyos': apoyos,
+        'noticias': noticias,
+        'banners': banners,  # <--- ESTE FALTABA
+    })
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Banner
+from .forms import BannerForm
+from django.contrib.auth.decorators import user_passes_test
+
+def es_admin_o_alcalde(user):
+    return user.is_authenticated and user.rol in ['alcalde', 'administrador']
+
+@user_passes_test(es_admin_o_alcalde)
+def lista_banners(request):
+    banners = Banner.objects.all().order_by('orden')
+    return render(request, 'banners/lista.html', {'banners': banners})
+
+@user_passes_test(es_admin_o_alcalde)
+def crear_banner(request):
+    if request.method == 'POST':
+        form = BannerForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_banners')
+    else:
+        form = BannerForm()
+    return render(request, 'banners/form.html', {'form': form})
+
+@user_passes_test(es_admin_o_alcalde)
+def eliminar_banner(request, banner_id):
+    banner = get_object_or_404(Banner, id=banner_id)
+    banner.delete()
+    return redirect('lista_banners')
 

@@ -190,10 +190,16 @@
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'inicio' %}">Inicio</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'lista_apoyo' %}">Apoyos</a></li>
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'listar_noticias_usuario' %}">Noticias</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="{% url 'enviar_sugerencia' %}">Quejas y Sugerencias</a></li>
+
+                {% if user.is_authenticated %}
+                <li class="nav-item"><a class="nav-link text-white" href="{% url 'enviar_sugerencia' %}">Quejas y Sugerencias</a>
+                </li>
+                {% endif %}
+
                 {% if user.rol == 'administrador' %}
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'panel_administrador' %}">Panel Admin</a></li>
                 {% endif %}
+
                 {% if user.rol == 'alcalde' %}
                 <li class="nav-item"><a class="nav-link text-white" href="{% url 'panel_alcalde' %}">Panel Alcalde</a></li>
                 {% endif %}
@@ -202,25 +208,26 @@
     </div>
 </nav>
 
-<!-- Carrusel -->
+<!-- Carrusel de Banners dinámico con estilo original -->
 <div class="container my-3">
-    <div id="bannerCarrusel" class="carousel slide rounded shadow-sm" data-bs-ride="carousel" style="max-width: 1100px; margin: auto;">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="{% static 'img/banner1.jpg' %}" class="d-block w-100 rounded" alt="Banner 1">
-            </div>
-            <div class="carousel-item">
-                <img src="{% static 'img/banner2.jpg' %}" class="d-block w-100 rounded" alt="Banner 2">
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarrusel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#bannerCarrusel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        </button>
+  <div id="bannerCarrusel" class="carousel slide rounded shadow-sm" data-bs-ride="carousel" style="max-width: 1100px; margin: auto;">
+    <div class="carousel-inner">
+      {% for banner in banners %}
+      <div class="carousel-item {% if forloop.first %}active{% endif %}">
+        <img src="{{ banner.imagen.url }}" class="d-block w-100 rounded" alt="{{ banner.titulo }}">
+      </div>
+      {% endfor %}
     </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarrusel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#bannerCarrusel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+  </div>
 </div>
+
+
 
 <div class="text-center text-muted mb-4">
     “Juntos transformamos Mérida”
@@ -248,7 +255,7 @@
         {% endfor %}
     </div>
     <div class="text-center">
-        <a href="" class="btn btn-ver-mas">Ver más programas</a>
+        <a href="{% url 'lista_apoyo' %}" class="btn btn-ver-mas">Ver más programas</a>
     </div>
 </div>
 

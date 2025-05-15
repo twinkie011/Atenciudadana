@@ -143,6 +143,9 @@ STATICFILES_DIRS = [
     BASE_DIR / 'autenticacion' / 'static',
 ]
 
+
 # Archivos de usuario (documentos PDF, imágenes, etc.)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
